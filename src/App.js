@@ -32,68 +32,132 @@ function App() {
               1. Story must be detailed, lengthy, and atmospheric.
               2. Guidance must be actionable 'how-to' advice.
               3. Verse must be a single string (not an object).
-              
-              Return ONLY JSON: 
-              {
-                "emotion": "detected emotion",
-                "hope": "the human virtue at stake",
-                "conflict": "the core dilemma",
-                "principle": "the philosophical teaching",
-                "outcome": "the hopeful resolution",
-                "character": "Name from the source",
-                "story": "Detailed, lengthy narrative (~150 words)",
-                "verse": "The scriptural quote as a single string",
-                "solution": "Actionable guidance for the user"
-              }` 
+              4. Assign an Explainable AI Score (0–100).
+
+The score must reflect the quality and consistency of the reasoning chain.
+
+Use this rubric:
+
+95–100: Excellent reasoning with strong logical consistency.
+85–94: Good reasoning with minor inconsistencies.
+70–84: Moderate reasoning with some weak connections.
+50–69: Weak reasoning or generic guidance.
+Below 50: Poor reasoning or inconsistent analysis.
+
+Do not always return high scores.
+Be critical and objective.
+The score should vary depending on the user's distress and the quality of the generated reasoning.
+For genuine emotional distress, the Explainable AI Score should normally fall between 80 and 95.
+Only assign:
+- 96–100 for exceptionally coherent reasoning.
+- Below 80 only if the reasoning chain is incomplete, inconsistent, or the guidance is weak.
+
+Generate a personalized Action Path.
+
+The Action Path must be based on:
+- the user's distress
+- detected emotion
+- moral conflict
+- principle
+- hopeful outcome
+- selected book source
+
+Rules:
+1. "today" must contain exactly 3 practical actions the user can perform immediately.
+2. "this_week" must contain exactly 3 practical habits or next steps.
+3. "reflection" must contain one thoughtful question inspired by the selected source.
+4. The Action Path must be different for every user query.
+5. Ensure the actions naturally follow from the reasoning chain and the story.
+
+Return ONLY JSON:
+{
+  "emotion":"detected emotion",
+  "hope":"the human virtue at stake",
+  "conflict":"the core dilemma",
+  "principle":"the philosophical teaching",
+  "outcome":"the hopeful resolution",
+  "character":"Name from the source",
+  "story":"Detailed, lengthy narrative (~150 words)",
+  "verse":"The scriptural quote as a single string",
+  "solution":"Actionable guidance for the user",
+
+  "action_path":{
+    "today":[
+      "Action 1",
+      "Action 2",
+      "Action 3"
+    ],
+    "this_week":[
+      "Action 1",
+      "Action 2",
+      "Action 3"
+    ],
+    "reflection":"One reflective question inspired by the selected wisdom."
+  },
+
+  "xai_score":0
+}`
             },
-            { 
-              role: "user", 
-              content: `Distress: "${userInput}". Book Source: "${bookSource}". Generate the chain and story.` 
+            {
+              role: "user",
+              content: `Distress: "${userInput}". Book Source: "${bookSource}". Generate the chain and story.`
             }
           ],
           response_format: { type: "json_object" }
         })
       });
 
-const data = await response.json();
+      const data = await response.json();
 
-const parsed = JSON.parse(
-  data.choices[0].message.content
-);
+      const parsed = JSON.parse(
+        data.choices[0].message.content
+      );
 
-setWisdom(parsed);
+      setWisdom(parsed);
 
-const { error } = await supabase
-  .from('wisdom_logs')
-  .insert([
-    {
-      user_input: userInput,
-      book_source: bookSource,
-      emotion: parsed.emotion,
-      hope: parsed.hope,
-      conflict: parsed.conflict,
-      principle: parsed.principle,
-      outcome: parsed.outcome,
-      character_name: parsed.character,
-      story: parsed.story,
-      verse: parsed.verse,
-      solution: parsed.solution
-    }
-  ]);
+      const { error } = await supabase
+        .from('wisdom_logs')
+        .insert([
+          {
+            user_input: userInput,
+            book_source: bookSource,
+            emotion: parsed.emotion,
+            hope: parsed.hope,
+            conflict: parsed.conflict,
+            principle: parsed.principle,
+            outcome: parsed.outcome,
+            character_name: parsed.character,
+            story: parsed.story,
+            verse: parsed.verse,
+            solution: parsed.solution,
+            action_path: parsed.action_path
+  ? `Today:
+• ${parsed.action_path.today.join('\n• ')}
 
-if (error) {
-  console.log("FULL ERROR:", error);
-  alert(JSON.stringify(error));
-} else {
-  console.log("INSERT SUCCESS");
-}
+Next Few Days:
+• ${parsed.action_path.this_week.join('\n• ')}
+
+Reflection:
+${parsed.action_path.reflection}`
+  : null,
+            xai_score: parsed.xai_score
+          }
+        ]);
+
+      if (error) {
+        console.log("FULL ERROR:", error);
+        alert(JSON.stringify(error));
+      } else {
+        console.log("INSERT SUCCESS");
+      }
+
     } catch (err) {
+      console.error(err);
       alert("System Error: Check your API connection and ensure .env is in the Wisdom-AI-App folder.");
     } finally {
       setLoading(false);
     }
   };
-
   const books = [
     "Srimad Bhagavat Gita", 
     "The Holy Ramayana", 
@@ -118,24 +182,156 @@ if (error) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '40px', alignItems: 'start' }}>
           
           {/* LEFT: INPUT PANEL */}
-          <section style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.02)', border: '1px solid #e0d5c1' }}>
-            <h3 style={{ color: '#5d4037', marginBottom: '15px', fontSize: '1.3rem' }}>Consult the Sages</h3>
-            <textarea 
-              style={{ width: '100%', height: '180px', padding: '20px', borderRadius: '15px', border: '1px solid #e0d5c1', marginBottom: '25px', boxSizing: 'border-box', fontSize: '1.1rem', fontFamily: 'inherit', outline: 'none', resize: 'none', backgroundColor: '#fdfbf7' }}
-              placeholder="Describe what is weighing on your heart..."
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-            />
+{/* LEFT: INPUT PANEL */}
+<section
+  style={{
+    backgroundColor: '#fff',
+    padding: '30px',
+    borderRadius: '25px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.02)',
+    border: '1px solid #e0d5c1'
+  }}
+>
+  <h3
+    style={{
+      color: '#5d4037',
+      marginBottom: '15px',
+      fontSize: '1.3rem'
+    }}
+  >
+    Consult the Sages
+  </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-              {books.map(b => (
-                <button key={b} onClick={() => generateWisdom(b)} disabled={loading} className="book-btn"
-                  style={{ padding: '15px', backgroundColor: '#5d4037', color: '#fff', borderRadius: '12px', border: 'none', fontSize: '0.9rem', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', minHeight: '80px', transition: 'all 0.3s ease' }}>
-                  {b}
-                </button>
-              ))}
-            </div>
-          </section>
+  <textarea
+    style={{
+      width: '100%',
+      height: '180px',
+      padding: '20px',
+      borderRadius: '15px',
+      border: '1px solid #e0d5c1',
+      marginBottom: '25px',
+      boxSizing: 'border-box',
+      fontSize: '1.1rem',
+      fontFamily: 'inherit',
+      outline: 'none',
+      resize: 'none',
+      backgroundColor: '#fdfbf7'
+    }}
+    placeholder="Describe what is weighing on your heart..."
+    value={userInput}
+    onChange={(e) => setUserInput(e.target.value)}
+  />
+
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '15px'
+    }}
+  >
+    {books.map((b) => (
+      <button
+        key={b}
+        onClick={() => generateWisdom(b)}
+        disabled={loading}
+        className="book-btn"
+        style={{
+          padding: '15px',
+          backgroundColor: '#5d4037',
+          color: '#fff',
+          borderRadius: '12px',
+          border: 'none',
+          fontSize: '0.9rem',
+          fontWeight: 'bold',
+          cursor: loading ? 'not-allowed' : 'pointer',
+          minHeight: '80px',
+          transition: 'all 0.3s ease'
+        }}
+      >
+        {b}
+      </button>
+    ))}
+  </div>
+
+  {/* ACTION PATH BELOW BOOK BUTTONS */}
+
+  {wisdom?.action_path && (
+    <div
+      style={{
+        marginTop: '25px',
+        padding: '20px',
+        backgroundColor: '#fdfbf7',
+        border: '1px solid #e0d5c1',
+        borderRadius: '15px'
+      }}
+    >
+      <h3
+        style={{
+          marginTop: 0,
+          marginBottom: '20px',
+          textAlign: 'center',
+          color: '#5d4037'
+        }}
+      >
+        Action Path
+      </h3>
+
+      <h4
+        style={{
+          color: '#8d6e63',
+          marginBottom: '10px'
+        }}
+      >
+        Today
+      </h4>
+
+      <ul style={{ lineHeight: '1.8', paddingLeft: '20px' }}>
+        {wisdom.action_path.today.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+
+      <h4
+        style={{
+          color: '#8d6e63',
+          marginTop: '20px',
+          marginBottom: '10px'
+        }}
+      >
+        Next Few Days
+      </h4>
+
+      <ul style={{ lineHeight: '1.8', paddingLeft: '20px' }}>
+        {wisdom.action_path.this_week.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+
+      <h4
+        style={{
+          color: '#8d6e63',
+          marginTop: '20px',
+          marginBottom: '10px'
+        }}
+      >
+        Reflection
+      </h4>
+
+      <div
+        style={{
+          backgroundColor: '#fff',
+          borderLeft: '4px solid #d4af37',
+          padding: '12px',
+          borderRadius: '8px',
+          fontStyle: 'italic',
+          color: '#5d4037'
+        }}
+      >
+        {wisdom.action_path.reflection}
+      </div>
+    </div>
+  )}
+</section>
 
           {/* RIGHT: OUTPUT PANEL */}
           <section style={{ minHeight: '500px' }}>
@@ -154,6 +350,32 @@ if (error) {
 
             {wisdom && (
               <div style={{ animation: 'fadeIn 0.8s ease-out' }}>
+
+                <div
+  style={{
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "15px",
+    textAlign: "center",
+    marginBottom: "20px"
+  }}
+>
+ <h3
+  style={{
+    color: "#5d4037",
+    margin: 0,
+    marginBottom: "10px",
+    fontSize: "1.5rem",
+    fontWeight: "bold"
+  }}
+>
+  Explainable AI Score
+</h3>
+
+  <h1 style={{ color: "#2e7d32", fontSize: "42px" }}>
+    {wisdom.xai_score}/100
+  </h1>
+</div>
                 
                 {/* 🔗 THE REASONING CHAIN FLOWCHART */}
                 <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '25px', border: '1px solid #e0d5c1', marginBottom: '30px', boxShadow: '0 5px 20px rgba(0,0,0,0.02)' }}>
@@ -190,6 +412,7 @@ if (error) {
                     <Sparkles size={20} style={{ marginRight: '10px', display: 'inline', verticalAlign: 'middle' }} />
                     <strong style={{ color: '#d4af37' }}>Path of Hope:</strong> {wisdom.solution}
                   </div>
+                  
                 </div>
               </div>
             )}
