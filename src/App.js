@@ -52,23 +52,64 @@ Only assign:
 - 96–100 for exceptionally coherent reasoning.
 - Below 80 only if the reasoning chain is incomplete, inconsistent, or the guidance is weak.
 
-Generate a personalized Action Path.
+Generate an IKS-based Action Path.
 
-The Action Path must be based on:
-- the user's distress
-- detected emotion
-- moral conflict
-- principle
-- hopeful outcome
-- selected book source
+The Action Path MUST be derived ONLY from the selected knowledge source.
 
-Rules:
-1. "today" must contain exactly 3 practical actions the user can perform immediately.
-2. "this_week" must contain exactly 3 practical habits or next steps.
-3. "reflection" must contain one thoughtful question inspired by the selected source.
-4. The Action Path must be different for every user query.
-5. Ensure the actions naturally follow from the reasoning chain and the story.
+Do NOT generate generic wellness, therapy, journaling, meditation, breathing, exercise, or motivational advice unless those practices are explicitly found in the selected source.
 
+Every action must be directly traceable to:
+- the selected source
+- the selected character
+- the identified principle
+- the selected verse
+- the generated story
+
+Each action should answer:
+"How would this character or scripture advise the user to act?"
+
+Source-specific rules:
+
+Bhagavad Gita
+- Base actions only on Karma Yoga, Dharma, Nishkama Karma, equanimity, self-discipline, self-control, devotion, and teachings from the Bhagavad Gita.
+- Prefer actions inspired by the generated verse.
+
+Ramayana
+- Base actions on Rama's conduct, Sita's resilience, Hanuman's devotion, Bharata's humility, and dharma.
+- Every action should reflect righteous conduct.
+
+Mahabharata
+- Base actions on ethical decision-making, duty, wisdom, patience, courage, and moral dilemmas faced by the characters.
+- Actions should reflect lessons from the selected character.
+
+Mahatma Gandhi
+- Base actions only on Satya, Ahimsa, self-discipline, simplicity, service, and constructive action.
+
+Dr. A.P.J. Abdul Kalam
+- Base actions only on disciplined learning, scientific thinking, perseverance, innovation, goal setting, and contribution to society.
+
+Swami Vivekananda
+- Base actions only on fearlessness, strength, self-confidence, discipline, service, concentration, and character building.
+
+Every action must explicitly mention either:
+- the selected character,
+- the selected principle,
+- or the selected verse.
+
+If an action could apply equally to any source, rewrite it.
+
+Do not invent practices that are absent from the selected source.
+
+Return exactly:
+
+today:
+3 source-specific actions
+
+this_week:
+3 source-specific practices
+
+reflection:
+1 question directly inspired by the selected verse or character.
 Return ONLY JSON:
 {
   "emotion":"detected emotion",
@@ -160,7 +201,7 @@ ${parsed.action_path.reflection}`
   };
   const books = [
     "Srimad Bhagavat Gita", 
-    "The Holy Ramayana", 
+    "Srimad Ramayana", 
     "The Mahabharata", 
     "Life of Mahatma Gandhi", 
     "Life of Dr. A.P.J. Abdul Kalam", 
@@ -252,85 +293,6 @@ ${parsed.action_path.reflection}`
       </button>
     ))}
   </div>
-
-  {/* ACTION PATH BELOW BOOK BUTTONS */}
-
-  {wisdom?.action_path && (
-    <div
-      style={{
-        marginTop: '25px',
-        padding: '20px',
-        backgroundColor: '#fdfbf7',
-        border: '1px solid #e0d5c1',
-        borderRadius: '15px'
-      }}
-    >
-      <h3
-        style={{
-          marginTop: 0,
-          marginBottom: '20px',
-          textAlign: 'center',
-          color: '#5d4037'
-        }}
-      >
-        Action Path
-      </h3>
-
-      <h4
-        style={{
-          color: '#8d6e63',
-          marginBottom: '10px'
-        }}
-      >
-        Today
-      </h4>
-
-      <ul style={{ lineHeight: '1.8', paddingLeft: '20px' }}>
-        {wisdom.action_path.today.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
-
-      <h4
-        style={{
-          color: '#8d6e63',
-          marginTop: '20px',
-          marginBottom: '10px'
-        }}
-      >
-        Next Few Days
-      </h4>
-
-      <ul style={{ lineHeight: '1.8', paddingLeft: '20px' }}>
-        {wisdom.action_path.this_week.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
-
-      <h4
-        style={{
-          color: '#8d6e63',
-          marginTop: '20px',
-          marginBottom: '10px'
-        }}
-      >
-        Reflection
-      </h4>
-
-      <div
-        style={{
-          backgroundColor: '#fff',
-          borderLeft: '4px solid #d4af37',
-          padding: '12px',
-          borderRadius: '8px',
-          fontStyle: 'italic',
-          color: '#5d4037'
-        }}
-      >
-        {wisdom.action_path.reflection}
-      </div>
-    </div>
-  )}
 </section>
 
           {/* RIGHT: OUTPUT PANEL */}
@@ -416,8 +378,101 @@ ${parsed.action_path.reflection}`
                 </div>
               </div>
             )}
-          </section>
-        </div>
+      </section>
+</div>
+
+{wisdom?.action_path && (
+<section
+style={{
+maxWidth:'1100px',
+width:'100%',
+margin:'35px auto 0',
+background:'#fff',
+padding:'30px',
+borderRadius:'25px',
+border:'1px solid #e0d5c1',
+boxShadow:'0 10px 30px rgba(0,0,0,0.02)'
+}}
+>
+
+<h2
+style={{
+textAlign:'center',
+color:'#5d4037',
+marginBottom:'25px'
+}}
+>
+Wisdom in Practice
+</h2>
+
+<div
+style={{
+display:'grid',
+gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',
+gap:'20px'
+}}
+>
+
+<div
+style={{
+padding:'20px',
+background:'#fdfbf7',
+borderRadius:'15px',
+border:'1px solid #e0d5c1'
+}}
+>
+
+<h3 style={{color:'#8d6e63'}}>🌞 Today</h3>
+
+<ul>
+{wisdom.action_path.today.map((item,index)=>(
+<li key={index}>{item}</li>
+))}
+</ul>
+
+</div>
+
+<div
+style={{
+padding:'20px',
+background:'#fdfbf7',
+borderRadius:'15px',
+border:'1px solid #e0d5c1'
+}}
+>
+
+<h3 style={{color:'#8d6e63'}}>📅 Next Few Days</h3>
+
+<ul>
+{wisdom.action_path.this_week.map((item,index)=>(
+<li key={index}>{item}</li>
+))}
+</ul>
+
+</div>
+
+</div>
+
+<div
+style={{
+marginTop:'20px',
+padding:'20px',
+background:'#fffdf8',
+borderLeft:'5px solid #d4af37',
+borderRadius:'12px'
+}}
+>
+
+<h3 style={{color:'#8d6e63'}}>💭 Reflection</h3>
+
+<p style={{fontStyle:'italic'}}>
+{wisdom.action_path.reflection}
+</p>
+
+</div>
+
+</section>
+)}
       </div>
       <footer style={{ marginTop: 'auto', padding: '60px 0 20px', color: '#8d6e63', fontSize: '0.9rem', textAlign: 'center', opacity: 0.7 }}>
         Wisdom AI • Neuro-Symbolic Guidance System • 2026
