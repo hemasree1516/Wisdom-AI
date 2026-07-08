@@ -71,6 +71,7 @@ Do NOT invent incidents, verses, or conversations.
 Use only authentic events from the selected source.
 2. Never invent verses, conversations, quotations, or historical events.
 
+
 3. The selected character MUST belong to the selected source.
 
 4. The Principle must summarize the lesson from the selected incident.
@@ -78,7 +79,30 @@ Use only authentic events from the selected source.
 5. The story must explain why that incident relates to the user's problem.
 
 6. If an authentic verse cannot be recalled with confidence, return a meaningful teaching instead.
+For every knowledge source, the "verse" field MUST NEVER be empty.
 
+If the source is a scripture (Bhagavad Gita, Ramayana, Mahabharata):
+- Return an authentic verse with chapter/book reference whenever possible.
+
+If the source is Mahatma Gandhi:
+- Return an authentic quotation from Gandhi's speeches, writings, letters, Young India, Hind Swaraj, My Experiments with Truth, or other documented works.
+
+If the source is Dr. A.P.J. Abdul Kalam:
+- Return an authentic quotation from Wings of Fire, Ignited Minds, India 2020, speeches, or interviews.
+
+If the source is Swami Vivekananda:
+- Return an authentic quotation from his speeches, Complete Works, Chicago Address, letters, or lectures.
+
+Never return:
+""
+null
+N/A
+Unknown
+Placeholder text.
+
+If an exact quotation cannot be recalled with certainty, return a documented teaching or well-known statement from that person instead.
+
+The "verse" field must always contain meaningful text.
 7. Generate an Explainable AI Score from 0-100.
 
 Generate an IKS-based Action Path.
@@ -117,8 +141,8 @@ Return ONLY valid JSON.
   "principle":"",
   "outcome":"",
   "character":"",
-  "story":"A detailed narrative between 100 and 200 words."
-  "verse":"",
+  "story":"A detailed narrative between 150 and 250 words."
+  "verse":"Authentic quotation or documented teaching from the selected knowledge source."
   "solution":"",
   "action_path":{
     "today":["","",""],
@@ -301,32 +325,6 @@ ${parsed.action_path.reflection}`
 
             {wisdom && (
               <div style={{ animation: 'fadeIn 0.8s ease-out' }}>
-
-                <div
-  style={{
-    background: "#fff",
-    padding: "20px",
-    borderRadius: "15px",
-    textAlign: "center",
-    marginBottom: "20px"
-  }}
->
- <h3
-  style={{
-    color: "#5d4037",
-    margin: 0,
-    marginBottom: "10px",
-    fontSize: "1.5rem",
-    fontWeight: "bold"
-  }}
->
-  Explainable AI Score
-</h3>
-
-  <h1 style={{ color: "#2e7d32", fontSize: "42px" }}>
-    {wisdom.xai_score}/100
-  </h1>
-</div>
                 
                 {/* 🔗 THE REASONING CHAIN FLOWCHART */}
                 <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '25px', border: '1px solid #e0d5c1', marginBottom: '30px', boxShadow: '0 5px 20px rgba(0,0,0,0.02)' }}>
@@ -348,27 +346,147 @@ ${parsed.action_path.reflection}`
                     </div>
                   </div>
                 </div>
-
-                {/* THE STORY & GUIDANCE CARD */}
-                <div style={{ padding: '35px', backgroundColor: '#fff', borderRadius: '25px', borderTop: '10px solid #5d4037', boxShadow: '0 15px 35px rgba(0,0,0,0.06)' }}>
-                  <h3 style={{ margin: '0 0 15px 0', color: '#5d4037', fontSize: '1.8rem' }}>{wisdom.character}</h3>
-                  <p style={{ fontSize: '1.15rem', lineHeight: '1.7', color: '#3e2723' }}>{wisdom.story}</p>
-                  
-                  <div style={{ padding: '20px', backgroundColor: '#fdfbf7', borderLeft: '5px solid #d4af37', fontStyle: 'italic', margin: '25px 0', fontSize: '1.1rem', color: '#5d4037', borderRadius: '0 10px 10px 0' }}>
-                    {/* Safeguard against "Object" error */}
-                    "{typeof wisdom.verse === 'object' ? (wisdom.verse.quote || JSON.stringify(wisdom.verse)) : wisdom.verse}"
-                  </div>
-
-                  <div style={{ padding: '20px', backgroundColor: '#5d4037', color: '#fff', borderRadius: '15px', fontSize: '1.1rem', lineHeight: '1.6' }}>
-                    <Sparkles size={20} style={{ marginRight: '10px', display: 'inline', verticalAlign: 'middle' }} />
-                    <strong style={{ color: '#d4af37' }}>Path of Hope:</strong> {wisdom.solution}
-                  </div>
-                  
-                </div>
+                 
               </div>
             )}
       </section>
-</div>
+    </div>
+    {wisdom && (
+<section
+  style={{
+    maxWidth: "1100px",
+    width: "100%",
+    margin: "35px auto 0",
+    padding: "40px",
+    backgroundColor: "#fff",
+    borderRadius: "25px",
+    borderTop: "10px solid #5d4037",
+    boxShadow: "0 15px 35px rgba(0,0,0,0.06)"
+  }}
+>
+  <h2
+    style={{
+      color: "#5d4037",
+      fontSize: "2rem",
+      marginBottom: "20px"
+    }}
+  >
+    {wisdom.character}
+  </h2>
+
+  <p
+    style={{
+      fontSize: "1.15rem",
+      lineHeight: "1.9",
+      color: "#3e2723",
+      textAlign: "justify"
+    }}
+  >
+    {wisdom.story}
+  </p>
+
+  <div
+    style={{
+      padding: "20px",
+      marginTop: "30px",
+      backgroundColor: "#fdfbf7",
+      borderLeft: "5px solid #d4af37",
+      borderRadius: "0 10px 10px 0",
+      fontStyle: "italic",
+      color: "#5d4037",
+      fontSize: "1.1rem"
+    }}
+  >
+    "{typeof wisdom.verse === "object"
+      ? (wisdom.verse.quote || JSON.stringify(wisdom.verse))
+      : wisdom.verse}"
+  </div>
+
+  <div
+    style={{
+      marginTop: "25px",
+      padding: "20px",
+      backgroundColor: "#5d4037",
+      color: "#fff",
+      borderRadius: "15px",
+      lineHeight: "1.7",
+      fontSize: "1.05rem"
+    }}
+  >
+    <Sparkles
+      size={20}
+      style={{
+        marginRight: "10px",
+        display: "inline",
+        verticalAlign: "middle"
+      }}
+    />
+
+    <strong style={{ color: "#d4af37" }}>
+      Path of Hope:
+    </strong>{" "}
+    {wisdom.solution}
+  </div>
+
+</section>
+  )
+  }
+{wisdom && (
+<section
+  style={{
+    maxWidth: "1100px",
+    width: "100%",
+    margin: "30px auto",
+    background: "#fff",
+    padding: "30px",
+    borderRadius: "20px",
+    border: "1px solid #e0d5c1",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.03)",
+    textAlign: "center"
+  }}
+>
+
+  <h2
+    style={{
+      color: "#5d4037",
+      marginBottom: "15px"
+    }}
+  >
+    Explainable AI Score
+  </h2>
+
+  <div
+    style={{
+      fontSize: "56px",
+      fontWeight: "bold",
+      color:
+        wisdom.xai_score >= 90
+          ? "#2e7d32"
+          : wisdom.xai_score >= 75
+          ? "#f9a825"
+          : "#c62828"
+    }}
+  >
+    {wisdom.xai_score}/100
+  </div>
+
+  <p
+    style={{
+      marginTop: "15px",
+      color: "#8d6e63",
+      lineHeight: "1.8",
+      maxWidth: "700px",
+      marginLeft: "auto",
+      marginRight: "auto"
+    }}
+  >
+    This score represents how consistently the AI connected the user's
+    distress, detected emotion, reasoning chain, selected IKS source,
+    principle, and generated guidance into a coherent explanation.
+  </p>
+
+</section>
+)}
 
 {wisdom?.action_path && (
 <section
